@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error {{ code }} - Student Record Management System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<main class="container">
+    <section class="card error-card">
+        <h1>Error {{ code }}</h1>
+        <p>{{ message }}</p>
+        <a id="home-link" class="btn btn-primary" href="{{ url_for('index') }}">Back to home</a>
+    </section>
+</main>
+</body>
+</html>

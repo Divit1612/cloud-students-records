@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Student Record Management System on AWS using EC2, DynamoDB, CloudWatch and Auto Scaling.">
+    <title>Student Record Management System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+    <div class="container topbar-inner">
+        <div class="brand">
+            <span class="logo">🎓</span>
+            <div>
+                <h1>Student Record Management</h1>
+                <p class="subtitle">Flask · EC2 · DynamoDB · CloudWatch · Auto Scaling</p>
+            </div>
+        </div>
+        <span class="badge" id="backend-badge">Storage: {{ backend }}</span>
+    </div>
+</header>
+
+<main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        <div class="flash-wrap">
+            {% for category, message in messages %}
+            <div class="flash flash-{{ category }}" role="alert">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="grid">
+        <section class="card" aria-labelledby="form-title">
+            {% if edit_student %}
+                <h2 id="form-title">Edit Student</h2>
+                <form id="student-form" method="post"
+                      action="{{ url_for('update_student', student_id=edit_student.student_id) }}">
+            {% else %}
+                <h2 id="form-title">Add Student</h2>
+                <form id="student-form" method="post" action="{{ url_for('add_student') }}">
+            {% endif %}
+                {% set src = edit_student or form_data %}
+                <label for="name">Full name</label>
+                <input id="name" name="name" type="text" maxlength="100" required
+                       value="{{ src.name or '' }}" placeholder="e.g. Priya Sharma">
+
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" maxlength="120" required
+                       value="{{ src.email or '' }}" placeholder="priya@example.com">
+
+                <label for="course">Course</label>
+                <input id="course" name="course" type="text" maxlength="100" required
+                       value="{{ src.course or '' }}" placeholder="e.g. B.Tech CSE">
+
+                <div class="actions">
+                    <button id="submit-btn" type="submit" class="btn btn-primary">
+                        {{ 'Update Student' if edit_student else 'Add Student' }}
+                    </button>
+                    {% if edit_student %}
+                    <a id="cancel-edit" href="{{ url_for('index') }}" class="btn btn-ghost">Cancel</a>
+                    {% endif %}
+                </div>
+            </form>
+        </section>
+
+        <section class="card" aria-labelledby="list-title">
+            <div class="card-head">
+                <h2 id="list-title">All Students</h2>
+                <span class="count">{{ students|length }} record{{ '' if students|length == 1 else 's' }}</span>
+            </div>
+
+            {% if students %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                    <tr><th>Name</th><th>Email</th><th>Course</th><th>Created (UTC)</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                    {% for s in students %}
+                    <tr>
+                        <td data-label="Name">
+                            <strong>{{ s.name }}</strong>
+                            <div class="sid" title="Student ID">{{ s.student_id }}</div>
+                        </td>
+                        <td data-label="Email">{{ s.email }}</td>
+                        <td data-label="Course">{{ s.course }}</td>
+                        <td data-label="Created">{{ s.created_at|replace('T', ' ')|replace('+00:00', '') }}</td>
+                        <td data-label="Actions" class="row-actions">
+                            <a id="edit-{{ s.student_id }}" class="btn btn-small"
+                               href="{{ url_for('index', edit=s.student_id) }}">Edit</a>
+                            <form method="post" action="{{ url_for('delete_student', student_id=s.student_id) }}"
+                                  onsubmit="return confirm('Delete this student record?');">
+                                <button id="delete-{{ s.student_id }}" type="submit"
+                                        class="btn btn-small btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty" id="empty-state">
+                <div class="empty-icon">📭</div>
+                <h3>No student records yet</h3>
+                <p>Use the form to add your first student.</p>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container">Cloud Computing Practical · Student Record Management System</div>
+</footer>
+</body>
+</html>

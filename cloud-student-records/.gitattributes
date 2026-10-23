@@ -1,0 +1,2 @@
+# Force Linux (LF) line endings for shell scripts so EC2 can execute them
+*.sh text eol=lf
